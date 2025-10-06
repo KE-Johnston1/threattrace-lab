@@ -8,13 +8,13 @@ This report documents a modular simulation of SSH brute force activity and honey
 
 ## Detection Modules
 
-### 🔐 Brute Force Detection
+###  Brute Force Detection
 - Multiple failed login attempts from usernames: `admin`, `root`, `user`
 - Activity spike between `2025-10-06 18:42` and `2025-10-06 18:45`
 - 20 total failed attempts over a short time window  
 *(Detected via `log_parser.py`)*
 
-### 🪤 Honeypot Activity
+###  Honeypot Activity
 - Connections received on port `2222` from simulated attacker IPs
 - Sample data sent by clients attempting unauthorized access
 - Logged events stored in `honeypot.log`  
