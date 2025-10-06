@@ -14,13 +14,13 @@ def build_chart(file_path):
 
     count = Counter(timeline)
     times = sorted(count.keys())
-    values = [count[t] for t in times]
+    attempts = [count[t] for t in times]
 
     plt.figure(figsize=(10, 5))
-    plt.plot(times, values, marker='o', linestyle='-', color='red')
+    plt.plot(times, attempts, marker='o', linestyle='-', color='red')
     plt.xticks(rotation=45, ha='right')
-    plt.xlabel("Time (minute)")
-    plt.ylabel("Failed Attempts")
+    plt.xlabel("Time")
+    plt.ylabel("Failed Login Attempts")
     plt.title("SSH Brute Force Timeline")
     plt.tight_layout()
     plt.grid(True)
@@ -28,3 +28,4 @@ def build_chart(file_path):
 
 if __name__ == "__main__":
     build_chart("../offensive-simulation/brute_force.log")
+
