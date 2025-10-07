@@ -10,3 +10,17 @@ It supports anomaly detection, IP clustering, and behavioral pattern mapping.
 
 ## Status
  In development — initial parser and mock data setup underway.
+
+## How to Run
+
+1. Install dependencies:
+   pip install -r requirements.txt
+
+2. Run the heatmap builder:
+   python heatmap_builder.py
+
+3. A heatmap will appear showing attacker interactions by time and port.
+
+Tip: Replace `mock-honeypot.log` with real honeypot output to visualize live data.
+
+   
