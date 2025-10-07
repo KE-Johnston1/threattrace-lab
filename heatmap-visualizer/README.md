@@ -61,5 +61,10 @@ This module is designed to integrate with the honeypot CLI and other components 
 
 Actively maintained. Additional features and visualizations in development.
 
+## Case Study
+
+A mock SSH brute force scenario is documented in [`case-study.md`](case-study.md), showing how this module detects and visualizes attacker behavior.
+
+
 
    
