@@ -1,50 +1,60 @@
 # Honeypot Heatmap Visualizer
 
-This module parses honeypot logs and generates a visual heatmap of attacker interactions over time.  
-It supports anomaly detection, IP clustering, and behavioral pattern mapping.
+This module is part of the `threattrace-lab` SOC toolkit. It parses honeypot logs and generates visual heatmaps to highlight attacker behavior over time. It includes anomaly detection, signature matching, and flexible CLI options for real-world analysis.
 
-## Goals
-- Visualize attacker behavior across time and ports
-- Highlight repeat offenders and tool signatures
-- Integrate with existing honeypot CLI output
+## Module Overview
 
-## Status
- In development — initial parser and mock data setup underway.
+- `heatmap_builder.py`: Generates time-vs-port heatmaps from honeypot logs
+- `anomaly_detector.py`: Flags IPs with unusually high activity
+- `signature_matcher.py`: Matches log entries against known attacker tool patterns
+- `requirements.txt`: Lists required Python packages
+- `mock-honeypot.log`: Sample log file for testing
 
-## How to Run
+## Setup
 
-1. Install dependencies:
-   pip install -r requirements.txt
+Install dependencies:
+pip install -r requirements.txt
 
-2. Run the heatmap builder:
-   python heatmap_builder.py
 
-3. A heatmap will appear showing attacker interactions by time and port.
+## Heatmap Builder
 
-Tip: Replace `mock-honeypot.log` with real honeypot output to visualize live data.
+Run the heatmap generator:
+python heatmap_builder.py --log mock-honeypot.log
+
+Optional flags:
+- `--filter-port 22` → Only include entries for port 22
+- `--save heatmap.png` → Save the heatmap as an image instead of displaying it
 
 ## Anomaly Detection
 
-This script identifies IPs with unusually high interaction frequency.
-
-To run:
+Identify IPs with high interaction frequency:
 python anomaly_detector.py
 
-Output will list IPs with more than 2 connections.
+Currently flags IPs with more than 2 connections.
 
 ## Signature Matcher
 
-This script scans honeypot logs for patterns matching known attacker tools.
-
-To run:
+Scan logs for attacker tool patterns:
 python signature_matcher.py
 
-It currently checks for:
+Matches include:
 - Nmap scans
 - Masscan probes
 - Brute force attempts on port 22
 
-Signatures can be expanded in the script.
+Signatures are defined in the script and can be expanded.
+
+## Sample Output
+
+Visual samples and saved heatmaps will be added to the `/samples` folder.
+
+## Integration
+
+This module is designed to integrate with the honeypot CLI and other components of `threattrace-lab`. Replace `mock-honeypot.log` with real output to visualize live data and support SOC workflows.
+
+## Status
+
+Actively maintained. Additional features and visualizations in development.
 
 
    
