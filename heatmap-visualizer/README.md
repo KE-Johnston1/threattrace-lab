@@ -23,4 +23,13 @@ It supports anomaly detection, IP clustering, and behavioral pattern mapping.
 
 Tip: Replace `mock-honeypot.log` with real honeypot output to visualize live data.
 
+## Anomaly Detection
+
+This script identifies IPs with unusually high interaction frequency.
+
+To run:
+python anomaly_detector.py
+
+Output will list IPs with more than 2 connections.
+
    
