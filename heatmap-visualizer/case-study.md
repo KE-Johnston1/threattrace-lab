@@ -26,4 +26,8 @@ A honeypot deployed on port 22 begins receiving repeated connection attempts fro
 
 ## Visual Output
 
-See `/samples/heatmap.png` for the visual representation of attacker behavior.
+![SSH Heatmap](samples/heatmap.png)
+
+This heatmap shows repeated SSH access attempts from IP `192.168.1.101` to port 22 between 12:01 and 12:10.  
+The concentrated activity suggests brute force behavior, confirmed by anomaly detection and signature matching.
+
