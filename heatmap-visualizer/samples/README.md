@@ -1,8 +1,8 @@
 # Sample Output Gallery
 
-This folder will contain saved heatmaps and visual outputs from the Honeypot Heatmap Visualizer module.
+This folder contains saved heatmaps and visual outputs from the Honeypot Heatmap Visualiser module.
 
-Each image will include a caption explaining the scenario and what the heatmap reveals.
+Each image includes a caption explaining the scenario and what the heatmap reveals.
 
 To generate your own:
 python heatmap_builder.py --log mock-honeypot.log --save samples/heatmap.png
