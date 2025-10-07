@@ -1,32 +1,16 @@
 # ThreatTrace Lab Summary
 
-This modular SOC lab explores one threat—SSH brute force—from three perspectives:
+ThreatTrace Lab is a modular cybersecurity project designed to simulate real-world threat scenarios and demonstrate SOC workflows. It is structured around three core layers:
 
----
+1. **Offensive Simulation**  
+   Ethical emulation of attacker behaviour to generate realistic honeypot logs.
 
-##  Module Links
+2. **Defensive Detection**  
+   Parsing and visualising honeypot data to identify suspicious activity, including anomaly detection and signature matching.
 
-- [Offensive Simulation](../offensive-simulation/brute_force_simulator.py)
-- [Defensive Detection](../defensive-detection/log_parser.py)
-- [Analyst Investigation](../analyst-investigation/timeline_builder.py)
-- [Incident Report](../analyst-investigation/incident_report.md)
+3. **Analyst Investigation**  
+   Timeline construction, IOC extraction, and incident reporting based on parsed data and visual outputs.
 
----
+Each module is standalone and beginner-friendly, with clear documentation and ethical framing. The lab is intended for portfolio development, recruiter engagement, and practical learning.
 
-##  Workflow Overview
-
-1. **Simulate attack** → Generate logs
-2. **Parse logs** → Detect patterns
-3. **Build timeline** → Extract IOCs
-4. **Report findings** → Recommend actions
-
----
-
-##  Repo Structure
-
-```plaintext
-threattrace-lab/
-├── offensive-simulation/
-├── defensive-detection/
-├── analyst-investigation/
-└── shared-assets/
+Current focus: SSH brute force detection using honeypot logs, heatmap visualisation, and case study documentation.
