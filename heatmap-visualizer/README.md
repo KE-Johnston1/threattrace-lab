@@ -46,7 +46,12 @@ Signatures are defined in the script and can be expanded.
 
 ## Sample Output
 
-Visual samples and saved heatmaps will be added to the `/samples` folder.
+Visual samples and saved heatmaps are stored in the `/samples` folder.
+
+Each image includes a caption explaining attacker behavior and detection insights.
+
+To generate your own:
+python heatmap_builder.py --log mock-honeypot.log --save samples/heatmap.png
 
 ## Integration
 
