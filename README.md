@@ -1,50 +1,63 @@
 # ThreatTrace Lab
 
-**Modular SOC lab exploring one threat through offensive simulation, defensive detection, and analyst investigation.**
+**Modular SOC simulation lab exploring attacker behavior through offensive emulation, defensive detection, and analyst investigation.**
 
 ---
 
-## Project Overview
+##  Overview
 
-This lab breaks down a single threat—starting with SSH brute force—into three perspectives:
+ThreatTrace Lab breaks down real-world threats into three layers:
 
-- **Offensive Simulation**: Emulate attacker behavior using custom scripts and tools.
-- **Defensive Detection**: Parse logs, trigger alerts, and visualize suspicious activity.
-- **Analyst Investigation**: Build timelines, extract IOCs, and document findings.
+- **Offensive Simulation**: Ethical emulation of attacker tactics using custom scripts and tooling
+- **Defensive Detection**: Honeypot logs, parsers, heatmaps, anomaly detection, and signature matching
+- **Analyst Investigation**: Timeline building, IOC extraction, and case study documentation
 
-Each module is standalone and beginner-friendly, with step-by-step walkthroughs and ethical framing.
-
----
-
-## Modules
-
-| Layer | Folder | Description |
-|-------|--------|-------------|
-| Offensive | `offensive-simulation` | Simulated brute force attacks |
-| Defensive | `defensive-detection` | Honeypot logs, parsers, alerting |
-| Analyst | `analyst-investigation` | Timeline builder, IOC extraction |
-| Shared | `shared-assets` | Sample logs, diagrams, screenshots |
+Each module is standalone, beginner-friendly, and designed for clarity, ethical framing, and recruiter impact.
 
 ---
 
-## Goals
+##  Modules
 
-- Show practical understanding of SOC workflows
-- Demonstrate trainability and ethical awareness
-- Empower others through clear documentation
-
----
-
-## Status
-
-- Repo initialized  
-- Offensive simulation module coming next
+| Layer       | Folder                      | Description                                      |
+|------------|-----------------------------|--------------------------------------------------|
+| Offensive   | `offensive-simulation`      | Simulated brute force attacks (coming soon)      |
+| Defensive   | [`heatmap-visualizer`](heatmap-visualizer/README.md) | Honeypot logs, heatmaps, anomaly detection       |
+| Analyst     | `analyst-investigation`     | Timeline builder, IOC extraction (coming soon)   |
+| Shared      | `shared-assets`             | Sample logs, diagrams, screenshots               |
 
 ---
 
-## Contact
+##  Featured Module: Heatmap Visualizer
 
-Created by [Karen Johnston](https://github.com/KE-Johnston1) — entry-level analyst building modular labs for real-world threats.
+- Parses honeypot logs and generates time-vs-port heatmaps
+- Flags anomalous IPs with high activity
+- Matches attacker patterns (e.g. Nmap, brute force)
+- Includes CLI wrapper, sample output gallery, and a full case study
+
+ [View Case Study →](heatmap-visualizer/case-study.md)
+
+---
+
+##  Goals
+
+- Showcase practical SOC workflows
+- Demonstrate ethical awareness and trainability
+- Empower others through clear, modular documentation
+
+---
+
+##  Status
+
+- ✅ Heatmap Visualizer module complete
+- 🔄 Offensive and Analyst modules in development
+- 🧪 More case studies and visualizations coming soon
+
+---
+
+##  Author
+
+Created by [Karen Johnston](https://github.com/KE-Johnston1) — entry-level cybersecurity analyst building modular labs for real-world threats.
+
 
 
 
