@@ -32,4 +32,19 @@ python anomaly_detector.py
 
 Output will list IPs with more than 2 connections.
 
+## Signature Matcher
+
+This script scans honeypot logs for patterns matching known attacker tools.
+
+To run:
+python signature_matcher.py
+
+It currently checks for:
+- Nmap scans
+- Masscan probes
+- Brute force attempts on port 22
+
+Signatures can be expanded in the script.
+
+
    
