@@ -1,7 +1,7 @@
 """Detect suspicious SSH authentication activity in ThreatTrace telemetry."""
 
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from pathlib import Path
 
 FAILURE_THRESHOLD = 5
@@ -17,14 +17,13 @@ def parse_event(line):
         return None
 
     try:
-        timestamp = datetime.fromisoformat(fields[0].replace("Z", "+00:00"))
+        timestamp = __import__("datetime").datetime.fromisoformat(
+            fields[0].replace("Z", "+00:00")
+        )
     except ValueError:
         return None
 
-    event = {
-        "timestamp": timestamp,
-        "event_type": fields[1],
-    }
+    event = {"timestamp": timestamp, "event_type": fields[1]}
 
     for field in fields[2:]:
         if "=" not in field:
@@ -53,61 +52,96 @@ def load_events(file_path):
 def detect_ssh_brute_force(events):
     """Detect repeated SSH failures followed by successful authentication.
 
-    Detection rule SSH-BRUTE-001 fires when a source produces at least five
-    failed SSH authentications within five minutes. A successful login from
-    the same source during the detection window raises the alert severity to
-    HIGH because it represents a potential account compromise.
+    SSH-BRUTE-001 fires once per source when at least five failed SSH
+    authentications occur within five minutes. If a successful login from the
+    same source follows the threshold event within five minutes, severity is
+    raised to HIGH because the activity may represent account compromise.
     """
-    failures_by_source = defaultdict(list)
-    alerts = []
+    ssh_events_by_source = defaultdict(list)
 
     for event in events:
-        if event.get("protocol") != "SSH":
+        if event.get("protocol") == "SSH":
+            ssh_events_by_source[event["src"]].append(event)
+
+    alerts = []
+    window = timedelta(minutes=WINDOW_MINUTES)
+
+    for source, source_events in ssh_events_by_source.items():
+        source_events.sort(key=lambda event: event["timestamp"])
+        failures = [
+            event
+            for event in source_events
+            if event["event_type"] == "SSH_AUTH_FAILURE"
+        ]
+        successes = [
+            event
+            for event in source_events
+            if event["event_type"] == "SSH_AUTH_SUCCESS"
+        ]
+
+        if len(failures) < FAILURE_THRESHOLD:
             continue
 
-        source = event["src"]
+        detection_window = None
+        for index in range(len(failures) - FAILURE_THRESHOLD + 1):
+            window_failures = failures[index : index + FAILURE_THRESHOLD]
+            if (
+                window_failures[-1]["timestamp"] - window_failures[0]["timestamp"]
+                <= window
+            ):
+                detection_window = window_failures
+                break
 
-        if event["event_type"] == "SSH_AUTH_FAILURE":
-            failures_by_source[source].append(event)
-            cutoff = event["timestamp"] - timedelta(minutes=WINDOW_MINUTES)
-            failures_by_source[source] = [
-                failure
-                for failure in failures_by_source[source]
-                if failure["timestamp"] >= cutoff
-            ]
+        if detection_window is None:
+            continue
 
-            if len(failures_by_source[source]) >= FAILURE_THRESHOLD:
-                failures = failures_by_source[source]
-                success = next(
-                    (
-                        candidate
-                        for candidate in events
-                        if candidate["event_type"] == "SSH_AUTH_SUCCESS"
-                        and candidate["src"] == source
-                        and event["timestamp"] <= candidate["timestamp"]
-                        <= event["timestamp"] + timedelta(minutes=WINDOW_MINUTES)
-                    ),
-                    None,
-                )
+        threshold_event = detection_window[-1]
+        successful_login = next(
+            (
+                success
+                for success in successes
+                if threshold_event["timestamp"]
+                <= success["timestamp"]
+                <= threshold_event["timestamp"] + window
+            ),
+            None,
+        )
 
-                alerts.append(
-                    {
-                        "alert_id": ALERT_ID,
-                        "rule_id": RULE_ID,
-                        "severity": "HIGH" if success else "MEDIUM",
-                        "source_ip": source,
-                        "destination_ip": event["dst"],
-                        "account": success["user"] if success else failures[-1]["user"],
-                        "failed_attempts": len(failures),
-                        "successful_login": success is not None,
-                        "first_seen": failures[0]["timestamp"],
-                        "last_seen": success["timestamp"] if success else failures[-1]["timestamp"],
-                    }
-                )
+        destination_ip = threshold_event["dst"]
+        account = (
+            successful_login["user"]
+            if successful_login
+            else detection_window[-1]["user"]
+        )
 
-                # Avoid emitting the same alert repeatedly for every failure
-                # after the threshold has already been reached.
-                failures_by_source[source] = []
+        # Include all failures that belong to the five-minute detection window
+        # rather than only the minimum threshold of five.
+        all_window_failures = [
+            failure
+            for failure in failures
+            if detection_window[0]["timestamp"]
+            <= failure["timestamp"]
+            <= threshold_event["timestamp"]
+        ]
+
+        alerts.append(
+            {
+                "alert_id": ALERT_ID,
+                "rule_id": RULE_ID,
+                "severity": "HIGH" if successful_login else "MEDIUM",
+                "source_ip": source,
+                "destination_ip": destination_ip,
+                "account": account,
+                "failed_attempts": len(all_window_failures),
+                "successful_login": successful_login is not None,
+                "first_seen": all_window_failures[0]["timestamp"],
+                "last_seen": (
+                    successful_login["timestamp"]
+                    if successful_login
+                    else all_window_failures[-1]["timestamp"]
+                ),
+            }
+        )
 
     return alerts
 
