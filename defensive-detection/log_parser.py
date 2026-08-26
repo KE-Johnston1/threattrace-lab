@@ -1,7 +1,7 @@
 """Detect suspicious SSH authentication activity in ThreatTrace telemetry."""
 
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 FAILURE_THRESHOLD = 5
@@ -17,9 +17,7 @@ def parse_event(line):
         return None
 
     try:
-        timestamp = __import__("datetime").datetime.fromisoformat(
-            fields[0].replace("Z", "+00:00")
-        )
+        timestamp = datetime.fromisoformat(fields[0].replace("Z", "+00:00"))
     except ValueError:
         return None
 
@@ -107,15 +105,6 @@ def detect_ssh_brute_force(events):
             None,
         )
 
-        destination_ip = threshold_event["dst"]
-        account = (
-            successful_login["user"]
-            if successful_login
-            else detection_window[-1]["user"]
-        )
-
-        # Include all failures that belong to the five-minute detection window
-        # rather than only the minimum threshold of five.
         all_window_failures = [
             failure
             for failure in failures
@@ -130,8 +119,12 @@ def detect_ssh_brute_force(events):
                 "rule_id": RULE_ID,
                 "severity": "HIGH" if successful_login else "MEDIUM",
                 "source_ip": source,
-                "destination_ip": destination_ip,
-                "account": account,
+                "destination_ip": threshold_event["dst"],
+                "account": (
+                    successful_login["user"]
+                    if successful_login
+                    else detection_window[-1]["user"]
+                ),
                 "failed_attempts": len(all_window_failures),
                 "successful_login": successful_login is not None,
                 "first_seen": all_window_failures[0]["timestamp"],
