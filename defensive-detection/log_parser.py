@@ -105,12 +105,14 @@ def detect_ssh_brute_force(events):
             None,
         )
 
+        # Count every failure in the five-minute investigation window that
+        # starts with the first event that established the detection pattern.
+        window_start = detection_window[0]["timestamp"]
+        window_end = window_start + window
         all_window_failures = [
             failure
             for failure in failures
-            if detection_window[0]["timestamp"]
-            <= failure["timestamp"]
-            <= threshold_event["timestamp"]
+            if window_start <= failure["timestamp"] <= window_end
         ]
 
         alerts.append(
