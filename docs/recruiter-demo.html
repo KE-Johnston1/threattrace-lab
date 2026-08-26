@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ThreatTrace SOC — Interactive Demo</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#121a2d; --border:#263453; --text:#e8edf7; --muted:#9ba8bf; --accent:#67b7ff; --danger:#ff6b6b; --warning:#ffd166; --good:#55d187; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:linear-gradient(145deg,#080c18,#10182b); color:var(--text); font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
+    .wrap { max-width:1180px; margin:auto; padding:28px 18px 60px; }
+    header { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; margin-bottom:24px; }
+    h1,h2,h3 { margin:0 0 8px; } h1 { font-size:30px; } h2 { font-size:19px; }
+    .muted { color:var(--muted); }
+    .badge { display:inline-block; padding:4px 9px; border:1px solid var(--border); border-radius:999px; color:var(--accent); font-size:12px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .panel { background:rgba(18,26,45,.94); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    .wide { grid-column:1/-1; }
+    .controls { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    button { border:1px solid var(--border); background:#18243d; color:var(--text); padding:10px 14px; border-radius:9px; cursor:pointer; font-weight:650; }
+    button:hover:not(:disabled) { border-color:var(--accent); } button:disabled { opacity:.45; cursor:not-allowed; }
+    .primary { background:#17446b; border-color:#2e79b6; }
+    .danger { border-color:#7b3840; } .success { border-color:#286444; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px; }
+    .stat { border:1px solid var(--border); border-radius:10px; padding:12px; } .stat strong { display:block; font-size:22px; }
+    .events { height:310px; overflow:auto; background:#080d18; border-radius:9px; padding:10px; font-family:ui-monospace,SFMono-Regular,monospace; font-size:12px; }
+    .event { padding:7px 4px; border-bottom:1px solid #18223a; } .failure { color:#ff9b9b; } .success-event { color:#7be5a1; }
+    .alert { border-left:4px solid var(--danger); padding:12px; background:rgba(255,107,107,.07); border-radius:7px; }
+    .hidden { display:none; } .pill { padding:3px 7px; border-radius:5px; background:#272f42; font-size:11px; }
+    .choice { width:100%; text-align:left; margin:7px 0; } .choice.correct { border-color:var(--good); } .choice.wrong { border-color:var(--danger); }
+    .timeline-item { display:grid; grid-template-columns:100px 28px 1fr; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+    footer { margin-top:22px; color:var(--muted); font-size:13px; }
+    @media(max-width:760px){ .grid,.stats{grid-template-columns:1fr;} .wide{grid-column:auto;} header{display:block;} }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><span class="badge">INTERACTIVE SOC CASE</span><h1>ThreatTrace</h1><div class="muted">SSH brute-force detection and analyst investigation</div></div>
+    <div class="muted">Synthetic telemetry • safe local demonstration</div>
+  </header>
+
+  <div class="grid">
+    <section class="panel wide">
+      <h2>1. Run the scenario</h2>
+      <p class="muted">Watch synthetic authentication events arrive, then see the detection engine correlate them into a SOC alert.</p>
+      <div class="controls"><button id="start" class="primary">▶ Start attack simulation</button><button id="reset">Reset</button></div>
+      <div class="stats">
+        <div class="stat"><span class="muted">Status</span><strong id="status">READY</strong></div>
+        <div class="stat"><span class="muted">Failures</span><strong id="failures">0</strong></div>
+        <div class="stat"><span class="muted">Successes</span><strong id="successes">0</strong></div>
+        <div class="stat"><span class="muted">Alerts</span><strong id="alerts">0</strong></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Live security events</h2>
+      <div id="events" class="events"><div class="muted">Press Start to generate telemetry…</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Detection engine</h2>
+      <div id="detection" class="muted">Waiting for telemetry.</div>
+      <div id="alertBox" class="alert hidden"></div>
+    </section>
+
+    <section id="investigation" class="panel wide hidden">
+      <h2>2. Analyst investigation</h2>
+      <div class="grid">
+        <div class="panel">
+          <h3>Indicators</h3>
+          <div id="iocs"></div>
+        </div>
+        <div class="panel">
+          <h3>MITRE ATT&amp;CK</h3>
+          <p><strong>T1110 — Brute Force</strong></p>
+          <p class="muted">Tactic: Credential Access</p>
+          <p>The evidence shows repeated SSH authentication failures from one source, followed by successful authentication.</p>
+          <span class="pill">Confidence: HIGH</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="timelinePanel" class="panel wide hidden">
+      <h2>3. Incident timeline</h2>
+      <div id="timeline"></div>
+    </section>
+
+    <section id="decision" class="panel wide hidden">
+      <h2>4. Analyst decision</h2>
+      <p>What should the analyst do first?</p>
+      <button class="choice" data-correct="true">Investigate the source host and validate the successful admin session</button>
+      <button class="choice" data-correct="false">Close the alert because the failed logins are probably user error</button>
+      <button class="choice" data-correct="false">Assume compromise is proven and immediately declare a breach</button>
+      <div id="feedback" class="muted" style="margin-top:10px"></div>
+    </section>
+  </div>
+
+  <footer>ThreatTrace is an educational portfolio project. All activity shown here is synthetic and does not contact real systems.</footer>
+</div>
+<script>
+const scenario = [
+  ['14:31:02','SSH_AUTH_FAILURE','admin'],['14:31:06','SSH_AUTH_FAILURE','admin'],['14:31:11','SSH_AUTH_FAILURE','admin'],
+  ['14:31:15','SSH_AUTH_FAILURE','root'],['14:31:20','SSH_AUTH_FAILURE','admin'],['14:31:24','SSH_AUTH_FAILURE','admin'],
+  ['14:31:31','SSH_AUTH_FAILURE','test'],['14:31:36','SSH_AUTH_FAILURE','admin'],['14:31:43','SSH_AUTH_FAILURE','admin'],
+  ['14:31:48','SSH_AUTH_FAILURE','root'],['14:31:55','SSH_AUTH_FAILURE','admin'],['14:32:01','SSH_AUTH_FAILURE','admin'],
+  ['14:32:06','SSH_AUTH_SUCCESS','admin']
+];
+let timer=null, index=0;
+const $=id=>document.getElementById(id);
+function reset(){ clearInterval(timer); timer=null; index=0; $('status').textContent='READY'; $('failures').textContent='0'; $('successes').textContent='0'; $('alerts').textContent='0'; $('events').innerHTML='<div class="muted">Press Start to generate telemetry…</div>'; $('detection').textContent='Waiting for telemetry.'; $('alertBox').classList.add('hidden'); $('investigation').classList.add('hidden'); $('timelinePanel').classList.add('hidden'); $('decision').classList.add('hidden'); $('feedback').textContent=''; document.querySelectorAll('.choice').forEach(b=>b.classList.remove('correct','wrong')); $('start').disabled=false; }
+function addEvent(item){
+  if(index===1) $('events').innerHTML='';
+  const [time,type,user]=item; const div=document.createElement('div'); div.className='event '+(type==='SSH_AUTH_SUCCESS'?'success-event':'failure');
+  div.textContent=`${time}  ${type.padEnd(18)}  10.10.10.50 → 10.10.10.10:22  user=${user}`; $('events').appendChild(div); $('events').scrollTop=$('events').scrollHeight;
+  if(type==='SSH_AUTH_FAILURE') $('failures').textContent=Number($('failures').textContent)+1; else $('successes').textContent='1';
+  $('status').textContent='MONITORING';
+  if(index===5){ $('detection').innerHTML='<span class="pill">THRESHOLD REACHED</span><p>Five SSH failures from the same source are now within the five-minute detection window.</p>'; }
+  if(type==='SSH_AUTH_SUCCESS') triggerAlert();
+}
+function triggerAlert(){ $('alerts').textContent='1'; $('status').textContent='ALERT'; $('detection').textContent='SSH-BRUTE-001 correlated repeated failures with a successful authentication.'; $('alertBox').classList.remove('hidden'); $('alertBox').innerHTML='<strong>HIGH — TT-SSH-001</strong><br>Multiple SSH authentication failures were followed by successful admin authentication from the same source.'; showInvestigation(); }
+function showInvestigation(){
+  $('investigation').classList.remove('hidden'); $('timelinePanel').classList.remove('hidden'); $('decision').classList.remove('hidden');
+  $('iocs').innerHTML='<p><strong>Source IP:</strong> 10.10.10.50</p><p><strong>Destination:</strong> 10.10.10.10:22</p><p><strong>Account:</strong> admin</p><p><strong>Protocol:</strong> SSH</p><p><strong>Pattern:</strong> 12 failures → success</p>';
+  $('timeline').innerHTML=scenario.map(e=>`<div class="timeline-item"><span>${e[0]}</span><span>${e[1]==='SSH_AUTH_SUCCESS'?'🔴':'❌'}</span><span>${e[1]==='SSH_AUTH_SUCCESS'?'Successful':'Failed'} SSH authentication for <strong>${e[2]}</strong></span></div>`).join('');
+}
+function start(){ reset(); $('start').disabled=true; index=0; $('status').textContent='SIMULATING'; timer=setInterval(()=>{ if(index>=scenario.length){clearInterval(timer); $('status').textContent='INVESTIGATION'; return;} addEvent(scenario[index]); index++; },350); }
+$('start').addEventListener('click',start); $('reset').addEventListener('click',reset);
+document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{ const ok=btn.dataset.correct==='true'; document.querySelectorAll('.choice').forEach(b=>b.classList.remove('correct','wrong')); btn.classList.add(ok?'correct':'wrong'); $('feedback').textContent=ok?'Correct. Investigate first, then establish whether the successful session was authorised or compromised. The telemetry supports suspicion, not proof of compromise.':'Not quite. The evidence supports escalation and investigation, but an analyst should avoid assuming compromise without additional evidence.'; }));
+</script>
+</body>
+</html>
