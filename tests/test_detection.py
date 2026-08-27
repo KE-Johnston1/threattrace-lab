@@ -1,7 +1,18 @@
+import importlib.util
 import unittest
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
-from defensive_detection.log_parser import detect_ssh_brute_force, parse_event
+ROOT = Path(__file__).resolve().parents[1]
+DETECTOR_PATH = ROOT / "defensive-detection" / "log_parser.py"
+SPEC = importlib.util.spec_from_file_location("threattrace_detector", DETECTOR_PATH)
+if SPEC is None or SPEC.loader is None:
+    raise ImportError(f"Unable to load detector: {DETECTOR_PATH}")
+DETECTOR = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(DETECTOR)
+
+detect_ssh_brute_force = DETECTOR.detect_ssh_brute_force
+parse_event = DETECTOR.parse_event
 
 
 def event(minutes=0, seconds=0, event_type="SSH_AUTH_FAILURE", user="admin", source="10.10.10.50"):
