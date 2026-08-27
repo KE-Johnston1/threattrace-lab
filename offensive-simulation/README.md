@@ -2,25 +2,25 @@
 
 ## Purpose
 
-The offensive-simulation module generates **controlled, synthetic security telemetry** for the ThreatTrace SOC investigation pipeline.
+The `offensive-simulation` module generates **controlled, synthetic security telemetry** for the ThreatTrace SOC investigation pipeline.
 
 It does not perform real attacks, connect to external systems, attempt authentication, or scan networks.
 
-The purpose is to create repeatable security events that can be consumed by the defensive detection and analyst investigation layers.
+The goal is to create realistic, repeatable evidence that the defensive and analyst layers can process.
 
 ## Current Scenario: SSH Brute Force
 
-The current simulator creates a controlled SSH authentication scenario:
+The simulator models:
 
 ```text
-12 authentication failures
-        ↓
-Repeated targeting of the admin account
-        ↓
-Successful admin authentication
+Repeated SSH authentication failures
+            ↓
+Targeted account activity
+            ↓
+Successful SSH authentication
 ```
 
-All events originate from the same synthetic source IP so that the defensive layer can identify the activity as a correlated authentication attack.
+The scenario uses a synthetic source and destination and writes structured events locally.
 
 ## Generated Telemetry
 
@@ -40,52 +40,42 @@ Example:
 2026-08-26T11:30:00Z | SSH_AUTH_FAILURE | protocol=SSH | src=10.10.10.50 | dst=10.10.10.10 | dst_port=22 | user=admin
 ```
 
-## Reproducibility
+## Run the Simulator
 
-The simulator uses a fixed random seed by default so that the same scenario can be reproduced during testing and demonstrations.
+From this directory:
 
 ```bash
 python brute_force_simulator.py
 ```
 
-The generated telemetry is written to:
+Or use the repository-level pipeline:
 
-```text
-brute_force.log
+```bash
+python ../main.py
 ```
 
-`brute_force.log` is generated test data and should not be treated as source code or real system telemetry.
+The simulator writes generated test telemetry to `brute_force.log`.
+
+## Why Simulate Instead of Attack?
+
+ThreatTrace demonstrates security detection without creating unnecessary risk. The simulator produces the **telemetry an attack might create** without performing authentication attempts against a real service.
+
+This makes the project safe to share as a public portfolio repository.
 
 ## SOC Integration
 
-The intended ThreatTrace workflow is:
-
 ```text
-Synthetic Attack Scenario
-          ↓
-Security Telemetry
-          ↓
+Synthetic Scenario
+       ↓
+Structured Telemetry
+       ↓
 Detection Engine
-          ↓
+       ↓
 SOC Alert
-          ↓
-Analyst Triage
-          ↓
-IOC Extraction + Timeline
-          ↓
-MITRE ATT&CK Mapping
-          ↓
-Incident Report
-          ↓
-Response Recommendations
+       ↓
+Analyst Investigation
 ```
-
-## Safety and Ethical Use
-
-This module is designed exclusively for defensive learning, testing, and portfolio demonstration. The simulator produces local synthetic data and does not interact with real hosts or services.
 
 ## Status
 
-**Implemented:** SSH brute-force telemetry simulation.
-
-**Next:** Integrate the generated telemetry with the defensive detection engine and produce a SOC alert for correlated failed and successful SSH authentication events.
+**Implemented:** controlled SSH authentication telemetry simulation.
