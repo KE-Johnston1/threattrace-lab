@@ -13,7 +13,7 @@ Open [`docs/recruiter-demo.html`](docs/recruiter-demo.html) to explore the inter
 
 The demo walks through a simulated SSH brute-force scenario:
 
-**Attack simulation → telemetry → detection → investigation → IOC extraction → timeline → MITRE ATT&CK → analyst decision**
+**Case → telemetry → detection → evidence → investigation → ATT&CK → analyst verdict → response/monitoring**
 
 ### Run the Python pipeline
 
@@ -27,6 +27,18 @@ The pipeline generates synthetic SSH telemetry and runs the defensive investigat
 
 ---
 
+## Why I Built ThreatTrace
+
+After completing CySA+, I wanted to demonstrate my understanding through practical work rather than relying on the certification alone. ThreatTrace is my attempt to show that I can investigate a security alert logically and methodically.
+
+The project is built around a simple idea: **an alert should start an investigation, not end it.**
+
+I think of the alert as an allegation and the telemetry as evidence. The analyst's job is to examine the evidence, consider alternative explanations, correlate additional information, and reach an assessment that the evidence supports.
+
+This is also why ThreatTrace uses a **human-in-the-loop** approach. Automation is valuable for processing telemetry and identifying patterns quickly, but it should work in partnership with human judgement rather than replace it. If an automated component fails, produces an incorrect result, or encounters behaviour it does not understand, the analyst still needs enough visibility to challenge the result and investigate further.
+
+---
+
 ## What is ThreatTrace?
 
 ThreatTrace is a deliberately safe cybersecurity portfolio project designed to demonstrate how a junior SOC analyst can move from raw security events to an actionable investigation.
@@ -34,6 +46,56 @@ ThreatTrace is a deliberately safe cybersecurity portfolio project designed to d
 The current scenario focuses on suspicious SSH authentication activity: repeated failures from one source followed by a successful authentication to an administrative account.
 
 The project does **not** perform real brute-force attacks or attempt authentication against external systems. The activity is simulated locally as structured telemetry.
+
+---
+
+## The ThreatTrace Investigation Model
+
+```text
+                    ALERT
+                      │
+                The allegation
+                      │
+                      ▼
+                  EVIDENCE
+                      │
+       ┌──────────────┼──────────────┐
+       ▼              ▼              ▼
+ Authentication    Network        Account /
+     logs          telemetry       endpoint
+       │              │              │
+       └──────────────┼──────────────┘
+                      ▼
+                 INVESTIGATION
+                      │
+                      ▼
+                 ASSESSMENT
+                      │
+       ┌──────────────┼──────────────┐
+       ▼              ▼              ▼
+     Benign       Suspicious      Malicious
+                      │
+                      ▼
+             RESPONSE / MONITORING
+```
+
+The application deliberately keeps the analyst involved. Detection logic can identify a pattern, but the analyst decides what the evidence supports.
+
+---
+
+## Analyst Verdicts
+
+ThreatTrace provides five possible assessments:
+
+| Verdict | Meaning |
+|---|---|
+| **Benign / Expected** | Evidence supports legitimate activity. |
+| **Suspicious — Continue Investigation** | Activity is concerning but intent is not established. |
+| **Likely Malicious** | Multiple indicators strongly support malicious activity, but further confirmation may still be required. |
+| **Confirmed Malicious** | Available evidence establishes malicious activity. |
+| **Insufficient Evidence — Continue Monitoring** | Evidence is not sufficient for a reliable conclusion; preserve visibility, correlate additional telemetry, and monitor for recurrence or new indicators. |
+
+The final category is important: uncertainty is itself an assessment. A previously unknown attack technique is one possibility when activity remains unexplained, but a zero-day should never be assumed without supporting evidence.
 
 ---
 
@@ -48,6 +110,8 @@ Synthetic Security Activity
             ↓
          SOC Alert
             ↓
+      Evidence Review
+            ↓
       IOC Extraction
             ↓
         Timeline
@@ -58,7 +122,7 @@ Synthetic Security Activity
             ↓
      Analyst Assessment
             ↓
-   Response Recommendations
+   Response / Monitoring
 ```
 
 This separation is intentional: a detection identifies suspicious behaviour; an investigation gathers evidence; an analyst makes the final assessment.
@@ -77,10 +141,29 @@ ThreatTrace currently demonstrates:
 - High-severity escalation when the failure pattern is followed by success
 - IOC extraction
 - Chronological investigation timelines
+- Hypothesis-driven investigation
 - MITRE ATT&CK mapping to **T1110 — Brute Force**
 - Incident reporting and response recommendations
 
 The scenario is synthetic and uses documentation-safe private IP addresses.
+
+---
+
+## Hypothesis-Driven Investigation
+
+ThreatTrace does not require the analyst to accept the first explanation that fits the alert.
+
+For the current SSH case, possible explanations include:
+
+- legitimate user activity
+- a misconfigured automated service
+- credential attack activity
+- account compromise
+- previously unexplained or novel behaviour
+
+Each hypothesis should be tested against available evidence.
+
+See [`analyst-investigation/hypothesis_matrix.md`](analyst-investigation/hypothesis_matrix.md).
 
 ---
 
@@ -99,6 +182,7 @@ threattrace-lab/
 │   ├── ioc_extractor.py
 │   ├── timeline_builder.py
 │   ├── timeline_chart.py
+│   ├── hypothesis_matrix.md
 │   ├── mitre_mapping.md
 │   ├── incident_report.md
 │   └── README.md
@@ -129,7 +213,7 @@ Parses structured telemetry and correlates authentication failures to identify s
 
 ### Analyst Investigation
 
-Extracts investigation indicators, builds a chronological timeline, maps the behaviour to MITRE ATT&CK, and documents the incident assessment.
+Extracts investigation indicators, builds a chronological timeline, evaluates competing hypotheses, maps the behaviour to MITRE ATT&CK, and documents the incident assessment.
 
 ### Heatmap Visualizer
 
@@ -211,12 +295,14 @@ This project is intended to demonstrate practical exposure to:
 - Security log analysis
 - Event correlation
 - IOC identification
+- Hypothesis-driven investigation
 - Timeline reconstruction
 - MITRE ATT&CK
 - Incident response concepts
 - Python scripting
 - Data visualisation
 - Defensive security automation
+- Human-in-the-loop analysis
 - Technical documentation
 - Safe security lab design
 
@@ -234,7 +320,7 @@ Any future expansion should retain the same controlled-lab principle.
 
 ## Project Status
 
-**Current:** SSH brute-force detection and investigation workflow implemented, with an interactive recruiter demonstration and visual analysis components.
+**Current:** SSH brute-force detection and investigation workflow implemented, with an interactive evidence-driven recruiter demonstration, hypothesis matrix, and visual analysis components.
 
 **Next priorities:** automated tests, stronger end-to-end integration, additional scenarios, and continued documentation refinement.
 
