@@ -1,27 +1,59 @@
-import pandas as pd
-import re
-from datetime import datetime
+"""Identify unusually active source IPs in ThreatTrace telemetry."""
 
-# Load log file
-with open("mock-honeypot.log", "r") as file:
-    lines = file.readlines()
+import argparse
+from collections import Counter
+from pathlib import Path
 
-# Parse log entries
-data = []
-pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) Connection from ([\d\.]+) to port (\d+)"
-for line in lines:
-    match = re.search(pattern, line)
-    if match:
-        timestamp = datetime.strptime(match.group(1), "%Y-%m-%d %H:%M:%S")
-        ip = match.group(2)
-        port = int(match.group(3))
-        data.append({"Time": timestamp, "IP": ip, "Port": port})
 
-df = pd.DataFrame(data)
+def load_events(log_file):
+    """Return parsed event dictionaries from structured ThreatTrace telemetry."""
+    events = []
+    with Path(log_file).open("r", encoding="utf-8") as file:
+        for line in file:
+            fields = [field.strip() for field in line.strip().split("|")]
+            if len(fields) < 2:
+                continue
+            event = {"event_type": fields[1]}
+            for field in fields[2:]:
+                if "=" in field:
+                    key, value = field.split("=", 1)
+                    event[key.strip()] = value.strip()
+            if "src" in event:
+                events.append(event)
+    return events
 
-# Detect anomalies: IPs with >2 hits
-ip_counts = df["IP"].value_counts()
-anomalies = ip_counts[ip_counts > 2]
 
-print("Anomalous IPs with high activity:")
-print(anomalies)
+def detect_anomalies(events, threshold=5):
+    """Return source IPs with at least ``threshold`` observed events."""
+    counts = Counter(event["src"] for event in events)
+    return {ip: count for ip, count in counts.items() if count >= threshold}
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Detect unusually active source IPs.")
+    parser.add_argument(
+        "--log",
+        default="../offensive-simulation/brute_force.log",
+        help="Path to structured ThreatTrace telemetry.",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=5,
+        help="Minimum event count required to flag a source IP.",
+    )
+    args = parser.parse_args()
+
+    anomalies = detect_anomalies(load_events(args.log), args.threshold)
+
+    print("Anomalous source IPs:")
+    if not anomalies:
+        print("None detected.")
+        return
+
+    for ip, count in sorted(anomalies.items(), key=lambda item: item[1], reverse=True):
+        print(f"  {ip}: {count} events")
+
+
+if __name__ == "__main__":
+    main()
