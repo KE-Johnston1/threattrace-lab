@@ -1,48 +1,89 @@
+"""Build a time-versus-event heatmap from ThreatTrace SSH telemetry."""
+
+import argparse
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-import argparse
-import re
-from datetime import datetime
 
-# CLI setup
-parser = argparse.ArgumentParser(description="Generate honeypot heatmap from log file.")
-parser.add_argument("--log", type=str, default="mock-honeypot.log", help="Path to honeypot log file")
-parser.add_argument("--filter-port", type=int, help="Only include entries for this port")
-parser.add_argument("--save", type=str, help="Path to save heatmap image (e.g. heatmap.png)")
-args = parser.parse_args()
 
-# Load log file
-with open(args.log, "r") as file:
-    lines = file.readlines()
+def load_telemetry(log_file):
+    """Parse structured ThreatTrace events into a DataFrame."""
+    records = []
+    with Path(log_file).open("r", encoding="utf-8") as file:
+        for line in file:
+            fields = [field.strip() for field in line.strip().split("|")]
+            if len(fields) < 2:
+                continue
 
-# Parse log entries
-data = []
-pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) Connection from ([\d\.]+) to port (\d+)"
-for line in lines:
-    match = re.search(pattern, line)
-    if match:
-        timestamp = datetime.strptime(match.group(1), "%Y-%m-%d %H:%M:%S")
-        ip = match.group(2)
-        port = int(match.group(3))
-        if args.filter_port and port != args.filter_port:
-            continue
-        data.append({"Time": timestamp, "IP": ip, "Port": port})
+            try:
+                timestamp = pd.to_datetime(fields[0], utc=True)
+            except (ValueError, TypeError):
+                continue
 
-df = pd.DataFrame(data)
+            event = {"Time": timestamp, "Event": fields[1]}
+            for field in fields[2:]:
+                if "=" in field:
+                    key, value = field.split("=", 1)
+                    event[key.strip()] = value.strip()
 
-# Create heatmap
-pivot = df.pivot_table(index=df["Time"].dt.strftime("%H:%M"), columns="Port", aggfunc="count", fill_value=0)
-plt.figure(figsize=(10, 6))
-plt.title("Honeypot Interaction Heatmap")
-sns.heatmap(pivot, cmap="YlOrRd", linewidths=0.5)
-plt.xlabel("Port")
-plt.ylabel("Time")
-plt.tight_layout()
+            records.append(event)
 
-if args.save:
-    plt.savefig(args.save)
-    print(f"Heatmap saved to {args.save}")
-else:
-    plt.show()
+    return pd.DataFrame(records)
 
+
+def build_heatmap(log_file, output_file=None, source_ip=None):
+    """Create a time/event activity heatmap for ThreatTrace telemetry."""
+    df = load_telemetry(log_file)
+
+    if df.empty:
+        raise ValueError("No valid ThreatTrace telemetry was found.")
+
+    if source_ip:
+        df = df[df["src"] == source_ip]
+
+    if df.empty:
+        raise ValueError("No telemetry matched the requested source IP.")
+
+    # Bucket events into one-minute intervals so bursts of activity are visible.
+    df["Minute"] = df["Time"].dt.floor("min")
+    activity = pd.crosstab(df["Minute"], df["Event"])
+
+    plt.figure(figsize=(11, 6))
+    plt.imshow(activity.values, aspect="auto")
+    plt.xticks(range(len(activity.columns)), activity.columns, rotation=30, ha="right")
+    plt.yticks(range(len(activity.index)), [time.strftime("%H:%M") for time in activity.index])
+    plt.xlabel("Event Type")
+    plt.ylabel("UTC Time")
+    plt.title("ThreatTrace SSH Activity Heatmap")
+    plt.colorbar(label="Event Count")
+    plt.tight_layout()
+
+    if output_file:
+        plt.savefig(output_file, dpi=150)
+        plt.close()
+        print(f"Heatmap saved to: {output_file}")
+    else:
+        plt.show()
+
+    return activity
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate a ThreatTrace SSH activity heatmap."
+    )
+    parser.add_argument(
+        "--log",
+        default="../offensive-simulation/brute_force.log",
+        help="Path to structured ThreatTrace telemetry.",
+    )
+    parser.add_argument("--source-ip", help="Only visualise activity from this source IP.")
+    parser.add_argument("--save", help="Save the heatmap to an image instead of displaying it.")
+    args = parser.parse_args()
+
+    build_heatmap(args.log, args.save, args.source_ip)
+
+
+if __name__ == "__main__":
+    main()
