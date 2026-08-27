@@ -1,20 +1,23 @@
 # Shared Assets
 
-This folder contains reusable resources for all modules within ThreatTrace Lab.
+This directory contains reusable documentation and supporting material for the ThreatTrace Lab.
 
-## Contents
+## Current Use
 
-- Sample honeypot logs  
-- Diagrams and visual outputs  
-- Screenshots for documentation  
-- Reference materials and templates
+Shared material supports the SOC workflow and may include:
 
-## Usage
+- architecture or workflow documentation
+- investigation guidance
+- visual outputs
+- screenshots used in documentation
+- reusable reference material
 
-Assets in this folder may be referenced by multiple modules.  
-Please ensure filenames and captions are clear and consistent.
+Legacy honeypot telemetry is no longer part of the ThreatTrace architecture.
+
+## Documentation Principle
+
+Shared documentation should describe the current project workflow and should not introduce alternative or obsolete execution paths.
 
 ## Status
 
-Folder structure established. Assets will be added as modules evolve.
-
+**Active:** documentation and supporting assets for the current synthetic SSH investigation workflow.
