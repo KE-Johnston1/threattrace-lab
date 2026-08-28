@@ -3,7 +3,7 @@
 > **Interactive SOC investigation laboratory demonstrating detection engineering, threat investigation, visual analysis, MITRE ATT&CK mapping, incident response, testing, and human-in-the-loop analysis.**
 
 [![Status](https://img.shields.io/badge/status-active-success)](#project-status)
-[![Safety](https://img.shields.io/badge/safety-synthetic%20telemetry-blue)](#safety-and-scope)
+[![Safety](https://img.shields.io/badge/safety-synthetic%20telemetry-blue)](#data-and-safety)
 
 ## Start Here
 
@@ -200,6 +200,7 @@ threattrace-lab/
 │   ├── hypothesis_matrix.md
 │   ├── mitre_mapping.md
 │   ├── incident_report.md
+│   ├── triage_decision.md
 │   └── README.md
 ├── heatmap-visualizer/
 │   ├── heatmap_builder.py
@@ -314,6 +315,21 @@ The project favours deterministic, explainable detection logic over opaque scori
 
 ---
 
+## Data and Safety
+
+ThreatTrace is an educational and portfolio environment and is designed to use synthetic security telemetry.
+
+- No real credentials are required or included.
+- No production or third-party systems are scanned, attacked, or authenticated against.
+- The sample authentication events are generated locally for defensive analysis.
+- The sample IP addresses use documentation/private address space rather than identifiable public hosts.
+- The project should not be populated with real employee, customer, production, or other personal data.
+- Third-party material, where referenced, should remain subject to its original licence and attribution requirements.
+
+This repository is not intended to provide legal advice. If real organisational or personal data is introduced in the future, the applicable data-protection, security, contractual, and retention requirements must be assessed before use.
+
+---
+
 ## Skills Demonstrated
 
 This project is intended to demonstrate practical exposure to:
@@ -338,21 +354,11 @@ This project is intended to demonstrate practical exposure to:
 
 ---
 
-## Safety and Scope
-
-ThreatTrace is an educational and portfolio environment.
-
-The attack scenario is simulated locally and generates synthetic security telemetry. It does not scan, attack, authenticate to, or otherwise interact with production or third-party systems.
-
-Any future expansion should retain the same controlled-lab principle.
-
----
-
 ## Project Status
 
 **Current:** SSH brute-force detection and investigation workflow implemented, with interactive evidence-driven recruiter demonstrations, hypothesis-driven analysis, visual correlation, automated tests, and GitHub Actions CI.
 
-**Next priorities:** end-to-end integration, additional defensive scenarios, broader test coverage, and continued documentation refinement.
+**Future development:** additional defensive scenarios, broader test coverage, deeper endpoint/network correlation, and continued documentation refinement.
 
 ---
 
