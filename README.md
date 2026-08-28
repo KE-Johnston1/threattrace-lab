@@ -1,6 +1,6 @@
 # ThreatTrace Lab
 
-> **Interactive SOC investigation laboratory demonstrating detection engineering, threat investigation, visual analysis, MITRE ATT&CK mapping, and incident response.**
+> **Interactive SOC investigation laboratory demonstrating detection engineering, threat investigation, visual analysis, MITRE ATT&CK mapping, incident response, testing, and human-in-the-loop analysis.**
 
 [![Status](https://img.shields.io/badge/status-active-success)](#project-status)
 [![Safety](https://img.shields.io/badge/safety-synthetic%20telemetry-blue)](#safety-and-scope)
@@ -9,11 +9,13 @@
 
 ### Recruiter Demo
 
-Open [`docs/recruiter-demo.html`](docs/recruiter-demo.html) to explore the interactive investigation experience.
+Open [`docs/recruiter-demo.html`](docs/recruiter-demo.html) for the guided investigation experience.
 
-The demo walks through a simulated SSH brute-force scenario:
+For the visual evidence-correlation experience, open [`docs/investigation-console.html`](docs/investigation-console.html).
 
-**Case → telemetry → detection → evidence → investigation → ATT&CK → analyst verdict → response/monitoring**
+The demonstrations follow:
+
+**Case → telemetry → detection → evidence → visual analysis → hypotheses → ATT&CK → analyst verdict → response/monitoring**
 
 ### Run the Python pipeline
 
@@ -24,6 +26,14 @@ python main.py
 ```
 
 The pipeline generates synthetic SSH telemetry and runs the defensive investigation workflow.
+
+### Run the tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+GitHub Actions also runs the test suite automatically on pushes and pull requests.
 
 ---
 
@@ -118,6 +128,8 @@ Synthetic Security Activity
             ↓
     Visual Analysis
             ↓
+     Hypothesis Matrix
+            ↓
     MITRE ATT&CK Mapping
             ↓
      Analyst Assessment
@@ -142,8 +154,11 @@ ThreatTrace currently demonstrates:
 - IOC extraction
 - Chronological investigation timelines
 - Hypothesis-driven investigation
+- Visual evidence correlation
 - MITRE ATT&CK mapping to **T1110 — Brute Force**
 - Incident reporting and response recommendations
+- Automated unit tests
+- GitHub Actions continuous integration
 
 The scenario is synthetic and uses documentation-safe private IP addresses.
 
@@ -194,7 +209,12 @@ threattrace-lab/
 │   ├── requirements.txt
 │   └── samples/
 ├── docs/
-│   └── recruiter-demo.html
+│   ├── recruiter-demo.html
+│   └── investigation-console.html
+├── tests/
+│   └── test_detection.py
+├── .github/workflows/
+│   └── tests.yml
 ├── shared-assets/
 └── LICENSE
 ```
@@ -219,9 +239,13 @@ Extracts investigation indicators, builds a chronological timeline, evaluates co
 
 Provides visual analysis of authentication activity so an analyst can identify concentrated activity and use the visualisation as supporting evidence during investigation.
 
-### Recruiter Demo
+### Recruiter Demo / Investigation Console
 
-Provides a browser-based, dependency-free demonstration of the investigation flow so a reviewer can explore the project without first installing the Python environment.
+Provides browser-based, dependency-free demonstrations of the investigation flow so a reviewer can explore the project without first installing the Python environment.
+
+### Tests and CI
+
+The test suite validates parsing and SSH detection behaviour, including threshold handling, time-window correlation, successful-login escalation, source separation, and protocol filtering. GitHub Actions runs these tests automatically on repository changes.
 
 ---
 
@@ -274,15 +298,19 @@ It covers:
 
 ---
 
-## Testing
+## Testing and Continuous Integration
 
-Automated tests are a planned next step. Until the test suite is added, the recommended validation is to run the simulator and then the detection pipeline locally and inspect the generated output.
+ThreatTrace includes automated unit tests for core parsing and detection behaviour.
+
+Run locally with:
 
 ```bash
-python main.py
+python -m unittest discover -s tests -v
 ```
 
-The project is being developed with a focus on deterministic, explainable detection logic rather than opaque scoring.
+GitHub Actions runs the same test suite automatically on pushes and pull requests.
+
+The project favours deterministic, explainable detection logic over opaque scoring.
 
 ---
 
@@ -303,6 +331,8 @@ This project is intended to demonstrate practical exposure to:
 - Data visualisation
 - Defensive security automation
 - Human-in-the-loop analysis
+- Automated testing
+- Continuous integration
 - Technical documentation
 - Safe security lab design
 
@@ -320,9 +350,9 @@ Any future expansion should retain the same controlled-lab principle.
 
 ## Project Status
 
-**Current:** SSH brute-force detection and investigation workflow implemented, with an interactive evidence-driven recruiter demonstration, hypothesis matrix, and visual analysis components.
+**Current:** SSH brute-force detection and investigation workflow implemented, with interactive evidence-driven recruiter demonstrations, hypothesis-driven analysis, visual correlation, automated tests, and GitHub Actions CI.
 
-**Next priorities:** automated tests, stronger end-to-end integration, additional scenarios, and continued documentation refinement.
+**Next priorities:** end-to-end integration, additional defensive scenarios, broader test coverage, and continued documentation refinement.
 
 ---
 
