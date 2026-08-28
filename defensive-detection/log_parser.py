@@ -22,7 +22,6 @@ def parse_event(line):
         return None
 
     event = {"timestamp": timestamp, "event_type": fields[1]}
-
     for field in fields[2:]:
         if "=" not in field:
             continue
@@ -48,15 +47,14 @@ def load_events(file_path):
 
 
 def detect_ssh_brute_force(events):
-    """Detect repeated SSH failures followed by successful authentication.
+    """Detect repeated SSH failures and evaluate a following login.
 
     SSH-BRUTE-001 fires once per source when at least five failed SSH
-    authentications occur within five minutes. If a successful login from the
-    same source follows the threshold event within five minutes, severity is
-    raised to HIGH because the activity may represent account compromise.
+    authentications occur within five minutes. A successful login from the
+    same source after the threshold raises severity to HIGH because the
+    account may have been compromised.
     """
     ssh_events_by_source = defaultdict(list)
-
     for event in events:
         if event.get("protocol") == "SSH":
             ssh_events_by_source[event["src"]].append(event)
@@ -67,13 +65,11 @@ def detect_ssh_brute_force(events):
     for source, source_events in ssh_events_by_source.items():
         source_events.sort(key=lambda event: event["timestamp"])
         failures = [
-            event
-            for event in source_events
+            event for event in source_events
             if event["event_type"] == "SSH_AUTH_FAILURE"
         ]
         successes = [
-            event
-            for event in source_events
+            event for event in source_events
             if event["event_type"] == "SSH_AUTH_SUCCESS"
         ]
 
@@ -82,12 +78,9 @@ def detect_ssh_brute_force(events):
 
         detection_window = None
         for index in range(len(failures) - FAILURE_THRESHOLD + 1):
-            window_failures = failures[index : index + FAILURE_THRESHOLD]
-            if (
-                window_failures[-1]["timestamp"] - window_failures[0]["timestamp"]
-                <= window
-            ):
-                detection_window = window_failures
+            candidate = failures[index:index + FAILURE_THRESHOLD]
+            if candidate[-1]["timestamp"] - candidate[0]["timestamp"] <= window:
+                detection_window = candidate
                 break
 
         if detection_window is None:
@@ -96,47 +89,40 @@ def detect_ssh_brute_force(events):
         threshold_event = detection_window[-1]
         successful_login = next(
             (
-                success
-                for success in successes
-                if threshold_event["timestamp"]
-                <= success["timestamp"]
+                success for success in successes
+                if threshold_event["timestamp"] <= success["timestamp"]
                 <= threshold_event["timestamp"] + window
             ),
             None,
         )
 
-        # Count every failure in the five-minute investigation window that
-        # starts with the first event that established the detection pattern.
         window_start = detection_window[0]["timestamp"]
         window_end = window_start + window
         all_window_failures = [
-            failure
-            for failure in failures
+            failure for failure in failures
             if window_start <= failure["timestamp"] <= window_end
         ]
 
-        alerts.append(
-            {
-                "alert_id": ALERT_ID,
-                "rule_id": RULE_ID,
-                "severity": "HIGH" if successful_login else "MEDIUM",
-                "source_ip": source,
-                "destination_ip": threshold_event["dst"],
-                "account": (
-                    successful_login["user"]
-                    if successful_login
-                    else detection_window[-1]["user"]
-                ),
-                "failed_attempts": len(all_window_failures),
-                "successful_login": successful_login is not None,
-                "first_seen": all_window_failures[0]["timestamp"],
-                "last_seen": (
-                    successful_login["timestamp"]
-                    if successful_login
-                    else all_window_failures[-1]["timestamp"]
-                ),
-            }
-        )
+        alerts.append({
+            "alert_id": ALERT_ID,
+            "rule_id": RULE_ID,
+            "severity": "HIGH" if successful_login else "MEDIUM",
+            "source_ip": source,
+            "destination_ip": threshold_event["dst"],
+            "account": (
+                successful_login["user"]
+                if successful_login
+                else detection_window[-1]["user"]
+            ),
+            "failed_attempts": len(all_window_failures),
+            "successful_login": successful_login is not None,
+            "first_seen": all_window_failures[0]["timestamp"],
+            "last_seen": (
+                successful_login["timestamp"]
+                if successful_login
+                else all_window_failures[-1]["timestamp"]
+            ),
+        })
 
     return alerts
 
@@ -173,13 +159,10 @@ def run_detection(file_path):
     """Run the SSH brute-force detector against a telemetry file."""
     events = load_events(file_path)
     alerts = detect_ssh_brute_force(events)
-
     print(f"Loaded {len(events)} security events.")
     print(f"Generated {len(alerts)} detection alert(s).")
-
     for alert in alerts:
         print_alert(alert)
-
     return alerts
 
 
