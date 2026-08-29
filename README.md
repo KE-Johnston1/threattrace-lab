@@ -11,7 +11,7 @@
 
 Open [`docs/recruiter-demo.html`](docs/recruiter-demo.html) for the guided investigation experience.
 
-For the visual evidence-correlation experience, open [`docs/investigation-console.html`](docs/investigation-console.html).
+For the visual evidence correlation experience, open [`docs/investigation-console.html`](docs/investigation-console.html).
 
 The demonstrations follow:
 
@@ -164,7 +164,7 @@ The scenario is synthetic and uses documentation-safe private IP addresses.
 
 ---
 
-## Hypothesis-Driven Investigation
+## Hypothesis Driven Investigation
 
 ThreatTrace does not require the analyst to accept the first explanation that fits the alert.
 
@@ -242,11 +242,11 @@ Provides visual analysis of authentication activity so an analyst can identify c
 
 ### Recruiter Demo / Investigation Console
 
-Provides browser-based, dependency-free demonstrations of the investigation flow so a reviewer can explore the project without first installing the Python environment.
+Provides browser based, dependency free demonstrations of the investigation flow so a reviewer can explore the project without first installing the Python environment.
 
 ### Tests and CI
 
-The test suite validates parsing and SSH detection behaviour, including threshold handling, time-window correlation, successful-login escalation, source separation, and protocol filtering. GitHub Actions runs these tests automatically on repository changes.
+The test suite validates parsing and SSH detection behaviour, including threshold handling, time-window correlation, successful login escalation, source separation, and protocol filtering. GitHub Actions runs these tests automatically on repository changes.
 
 ---
 
@@ -265,7 +265,7 @@ Failed Attempts:  12
 Successful Login: YES
 ```
 
-The correct analyst conclusion is **not automatically "the server was compromised."** The evidence indicates suspicious authentication activity consistent with brute-force behaviour and requires investigation of the successful session and post-authentication activity.
+The correct analyst conclusion is **not automatically "the server was compromised."** The evidence indicates suspicious authentication activity consistent with brute force behaviour and requires investigation of the successful session and post-authentication activity.
 
 ---
 
@@ -317,16 +317,16 @@ The project favours deterministic, explainable detection logic over opaque scori
 
 ## Data and Safety
 
-ThreatTrace is an educational and portfolio environment and is designed to use synthetic security telemetry.
+Threat Trace is an educational and portfolio environment and is designed to use synthetic security telemetry.
 
 - No real credentials are required or included.
-- No production or third-party systems are scanned, attacked, or authenticated against.
+- No production or third party systems are scanned, attacked, or authenticated against.
 - The sample authentication events are generated locally for defensive analysis.
 - The sample IP addresses use documentation/private address space rather than identifiable public hosts.
 - The project should not be populated with real employee, customer, production, or other personal data.
 - Third-party material, where referenced, should remain subject to its original licence and attribution requirements.
 
-This repository is not intended to provide legal advice. If real organisational or personal data is introduced in the future, the applicable data-protection, security, contractual, and retention requirements must be assessed before use.
+This repository is not intended to provide legal advice. If real organisational or personal data is introduced in the future, the applicable data protection, security, contractual, and retention requirements must be assessed before use.
 
 ---
 
@@ -339,7 +339,7 @@ This project is intended to demonstrate practical exposure to:
 - Security log analysis
 - Event correlation
 - IOC identification
-- Hypothesis-driven investigation
+- Hypothesis driven investigation
 - Timeline reconstruction
 - MITRE ATT&CK
 - Incident response concepts
