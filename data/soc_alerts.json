@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "alert_id": "TT-SSH-001",
+      "rule_id": "SSH-BRUTE-001",
+      "severity": "HIGH",
+      "timestamp": "2026-08-01T09:14:22Z",
+      "source_ip": "10.10.10.50",
+      "destination_ip": "10.10.10.10",
+      "protocol": "SSH",
+      "destination_port": 22,
+      "account": "admin",
+      "detection_summary": "Repeated SSH authentication failures followed by successful authentication.",
+      "initial_assessment": "Insufficient Evidence",
+      "verification_requirements": [
+        "Verify account ownership",
+        "Verify authorization for the source host",
+        "Confirm expected login timing",
+        "Review successful session and post-authentication activity",
+        "Correlate network and endpoint evidence",
+        "Check maintenance, deployment, change, or security-testing context"
+      ]
+    },
+    {
+      "alert_id": "TT-SSH-002",
+      "rule_id": "SSH-BRUTE-001",
+      "severity": "MEDIUM",
+      "timestamp": "2026-08-01T14:32:11Z",
+      "source_ip": "10.10.10.20",
+      "destination_ip": "10.10.10.10",
+      "protocol": "SSH",
+      "destination_port": 22,
+      "account": "deploy",
+      "detection_summary": "Repeated SSH authentication failures from a known administration host.",
+      "initial_assessment": "Requires Investigation",
+      "verification_requirements": [
+        "Confirm deployment/change activity",
+        "Verify the account and source relationship",
+        "Review authentication and network evidence"
+      ]
+    }
+  ]
+}
