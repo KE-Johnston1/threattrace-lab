@@ -1,14 +1,14 @@
-# Offensive Simulation
+# Synthetic Telemetry Generator
 
 ## Purpose
 
-The `offensive-simulation` module generates **controlled, synthetic security telemetry** for the ThreatTrace SOC investigation pipeline.
+The `offensive-simulation` directory contains a **controlled, synthetic security telemetry generator** for the ThreatTrace investigation pipeline.
 
 It does not perform real attacks, connect to external systems, attempt authentication, or scan networks.
 
 The goal is to create realistic, repeatable evidence that the defensive and analyst layers can process.
 
-## Current Scenario: SSH Brute Force
+## Current Scenario: SSH Authentication Attack Pattern
 
 The simulator models:
 
@@ -40,7 +40,7 @@ Example:
 2026-08-26T11:30:00Z | SSH_AUTH_FAILURE | protocol=SSH | src=10.10.10.50 | dst=10.10.10.10 | dst_port=22 | user=admin
 ```
 
-## Run the Simulator
+## Run the Generator
 
 From this directory:
 
@@ -54,13 +54,13 @@ Or use the repository-level pipeline:
 python ../main.py
 ```
 
-The simulator writes generated test telemetry to `brute_force.log`.
+The generator writes synthetic test telemetry to `brute_force.log`.
 
-## Why Simulate Instead of Attack?
+## Why Generate Telemetry Instead of Attack?
 
-ThreatTrace demonstrates security detection without creating unnecessary risk. The simulator produces the **telemetry an attack might create** without performing authentication attempts against a real service.
+ThreatTrace demonstrates defensive security detection without creating unnecessary risk. The generator produces the **telemetry an attack might create** without performing authentication attempts against a real service.
 
-This makes the project safe to share as a public portfolio repository.
+This keeps the project suitable for a public portfolio and makes the safety boundary explicit.
 
 ## SOC Integration
 
@@ -78,4 +78,4 @@ Analyst Investigation
 
 ## Status
 
-**Implemented:** controlled SSH authentication telemetry simulation.
+**Implemented:** controlled SSH authentication telemetry generation for local defensive analysis.

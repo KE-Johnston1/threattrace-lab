@@ -1,6 +1,6 @@
 # ThreatTrace Lab
 
-> **Interactive SOC investigation laboratory demonstrating detection engineering, threat investigation, visual analysis, MITRE ATT&CK mapping, incident response, testing, and human-in-the-loop analysis.**
+> **Interactive SOC investigation portfolio lab: synthetic telemetry → detection → evidence → assessment.**
 
 [![Status](https://img.shields.io/badge/status-active-success)](#project-status)
 [![Safety](https://img.shields.io/badge/safety-synthetic%20telemetry-blue)](#data-and-safety)
@@ -11,11 +11,13 @@
 
 Open [`docs/recruiter-demo.html`](docs/recruiter-demo.html) for the guided investigation experience.
 
-For the visual evidence correlation experience, open [`docs/investigation-console.html`](docs/investigation-console.html).
+For a visual evidence summary, open [`docs/analyst-dashboard.html`](docs/analyst-dashboard.html).
 
-The demonstrations follow:
+For the evidence-correlation experience, open [`docs/investigation-console.html`](docs/investigation-console.html).
 
-**Case → telemetry → detection → evidence → visual analysis → hypotheses → ATT&CK → analyst verdict → response/monitoring**
+The project follows one simple model:
+
+**Alert → evidence → investigation → assessment → response/monitoring**
 
 ### Run the Python pipeline
 
@@ -41,17 +43,17 @@ GitHub Actions also runs the test suite automatically on pushes and pull request
 
 After completing CySA+, I wanted to demonstrate my understanding through practical work rather than relying on the certification alone. ThreatTrace is my attempt to show that I can investigate a security alert logically and methodically.
 
-The project is built around a simple idea: **an alert should start an investigation, not end it.**
+The core principle is simple: **an alert should start an investigation, not end it.**
 
-I think of the alert as an allegation and the telemetry as evidence. The analyst's job is to examine the evidence, consider alternative explanations, correlate additional information, and reach an assessment that the evidence supports.
+The alert is an allegation; telemetry is evidence. The analyst's job is to examine the evidence, consider alternative explanations, correlate additional information, and reach an assessment that the evidence supports.
 
-This is also why ThreatTrace uses a **human-in-the-loop** approach. Automation is valuable for processing telemetry and identifying patterns quickly, but it should work in partnership with human judgement rather than replace it. If an automated component fails, produces an incorrect result, or encounters behaviour it does not understand, the analyst still needs enough visibility to challenge the result and investigate further.
+This is a learning project, not production SOC experience. It uses synthetic telemetry and does not represent operation of a live SOC.
 
 ---
 
 ## What is ThreatTrace?
 
-ThreatTrace is a deliberately safe cybersecurity portfolio project designed to demonstrate how a junior SOC analyst can move from raw security events to an actionable investigation.
+ThreatTrace is a deliberately safe cybersecurity portfolio project demonstrating how a junior SOC analyst can move from raw security events to an actionable investigation.
 
 The current scenario focuses on suspicious SSH authentication activity: repeated failures from one source followed by a successful authentication to an administrative account.
 
@@ -93,64 +95,16 @@ The application deliberately keeps the analyst involved. Detection logic can ide
 
 ---
 
-## Analyst Verdicts
+## Current Scenario
 
-ThreatTrace provides five possible assessments:
-
-| Verdict | Meaning |
-|---|---|
-| **Benign / Expected** | Evidence supports legitimate activity. |
-| **Suspicious — Continue Investigation** | Activity is concerning but intent is not established. |
-| **Likely Malicious** | Multiple indicators strongly support malicious activity, but further confirmation may still be required. |
-| **Confirmed Malicious** | Available evidence establishes malicious activity. |
-| **Insufficient Evidence — Continue Monitoring** | Evidence is not sufficient for a reliable conclusion; preserve visibility, correlate additional telemetry, and monitor for recurrence or new indicators. |
-
-The final category is important: uncertainty is itself an assessment. A previously unknown attack technique is one possibility when activity remains unexplained, but a zero-day should never be assumed without supporting evidence.
-
----
-
-## SOC Workflow
-
-```text
-Synthetic Security Activity
-            ↓
-       Structured Logs
-            ↓
-      Detection Engine
-            ↓
-         SOC Alert
-            ↓
-      Evidence Review
-            ↓
-      IOC Extraction
-            ↓
-        Timeline
-            ↓
-    Visual Analysis
-            ↓
-     Hypothesis Matrix
-            ↓
-    MITRE ATT&CK Mapping
-            ↓
-     Analyst Assessment
-            ↓
-   Response / Monitoring
-```
-
-This separation is intentional: a detection identifies suspicious behaviour; an investigation gathers evidence; an analyst makes the final assessment.
-
----
-
-## Detection Scenario
-
-ThreatTrace currently demonstrates:
+ThreatTrace demonstrates:
 
 - SSH authentication failures
 - Correlation by source IP
 - A five-minute detection window
-- A threshold of repeated failures
+- A repeated-failure threshold
 - Successful authentication following failed attempts
-- High-severity escalation when the failure pattern is followed by success
+- Severity escalation when the failure pattern is followed by success
 - IOC extraction
 - Chronological investigation timelines
 - Hypothesis-driven investigation
@@ -160,11 +114,11 @@ ThreatTrace currently demonstrates:
 - Automated unit tests
 - GitHub Actions continuous integration
 
-The scenario is synthetic and uses documentation-safe private IP addresses.
+The scenario is synthetic and uses private/documentation-safe IP addresses.
 
 ---
 
-## Hypothesis Driven Investigation
+## Hypothesis-Driven Investigation
 
 ThreatTrace does not require the analyst to accept the first explanation that fits the alert.
 
@@ -174,11 +128,27 @@ For the current SSH case, possible explanations include:
 - a misconfigured automated service
 - credential attack activity
 - account compromise
-- previously unexplained or novel behaviour
+- previously unexplained behaviour
 
 Each hypothesis should be tested against available evidence.
 
 See [`analyst-investigation/hypothesis_matrix.md`](analyst-investigation/hypothesis_matrix.md).
+
+---
+
+## Analyst Verdicts
+
+ThreatTrace uses evidence-based assessments rather than automatically declaring compromise:
+
+| Verdict | Meaning |
+|---|---|
+| **Benign / Expected** | Evidence supports legitimate activity. |
+| **Suspicious — Continue Investigation** | Activity is concerning but intent is not established. |
+| **Likely Malicious** | Multiple indicators strongly support malicious activity, but further confirmation may still be required. |
+| **Confirmed Malicious** | Available evidence establishes malicious activity. |
+| **Insufficient Evidence — Continue Monitoring** | Evidence is not sufficient for a reliable conclusion. |
+
+The current case supports **Likely Malicious — Continue Investigation**, because the failure pattern is followed by successful administrative authentication. It does not by itself prove compromise.
 
 ---
 
@@ -204,29 +174,32 @@ threattrace-lab/
 │   └── README.md
 ├── heatmap-visualizer/
 │   ├── heatmap_builder.py
-│   ├── anomaly_detector.py
-│   ├── signature_matcher.py
 │   ├── case-study.md
 │   ├── requirements.txt
 │   └── samples/
+├── soc_triage/
+│   └── post_investigation.py
 ├── docs/
 │   ├── recruiter-demo.html
+│   ├── analyst-dashboard.html
 │   └── investigation-console.html
 ├── tests/
 │   └── test_detection.py
+├── SECURITY-AUDIT.md
 ├── .github/workflows/
 │   └── tests.yml
-├── shared-assets/
 └── LICENSE
 ```
+
+The project intentionally avoids turning into a full SIEM, SOAR platform or case-management application.
 
 ---
 
 ## Components
 
-### Offensive Simulation
+### Synthetic Telemetry Generator
 
-Generates controlled, synthetic SSH authentication telemetry. It models the evidence of a brute-force scenario without performing real authentication attempts.
+Generates controlled SSH authentication telemetry locally. It models the evidence of a brute-force scenario without performing real authentication attempts.
 
 ### Defensive Detection
 
@@ -236,17 +209,17 @@ Parses structured telemetry and correlates authentication failures to identify s
 
 Extracts investigation indicators, builds a chronological timeline, evaluates competing hypotheses, maps the behaviour to MITRE ATT&CK, and documents the incident assessment.
 
-### Heatmap Visualizer
+### Visual Analysis
 
-Provides visual analysis of authentication activity so an analyst can identify concentrated activity and use the visualisation as supporting evidence during investigation.
+The heatmap component provides a compact visual view of authentication activity. The browser-based analyst dashboard provides a dependency-free visual summary of the evidence, timeline and assessment.
 
 ### Recruiter Demo / Investigation Console
 
-Provides browser based, dependency free demonstrations of the investigation flow so a reviewer can explore the project without first installing the Python environment.
+Provides browser-based demonstrations of the investigation flow so a reviewer can explore the project without first installing the Python environment.
 
 ### Tests and CI
 
-The test suite validates parsing and SSH detection behaviour, including threshold handling, time-window correlation, successful login escalation, source separation, and protocol filtering. GitHub Actions runs these tests automatically on repository changes.
+The test suite validates parsing and SSH detection behaviour, including threshold handling, time-window correlation, successful-login escalation, source separation and protocol filtering. GitHub Actions runs these tests automatically on repository changes.
 
 ---
 
@@ -265,7 +238,7 @@ Failed Attempts:  12
 Successful Login: YES
 ```
 
-The correct analyst conclusion is **not automatically "the server was compromised."** The evidence indicates suspicious authentication activity consistent with brute force behaviour and requires investigation of the successful session and post-authentication activity.
+The correct analyst conclusion is **not automatically "the server was compromised."** The evidence indicates suspicious authentication activity consistent with brute-force behaviour and requires investigation of the successful session and post-authentication activity.
 
 ---
 
@@ -284,62 +257,49 @@ See [`analyst-investigation/mitre_mapping.md`](analyst-investigation/mitre_mappi
 
 The completed case study is available at [`analyst-investigation/incident_report.md`](analyst-investigation/incident_report.md).
 
-It covers:
-
-- executive summary
-- detection evidence
-- investigation indicators
-- timeline
-- ATT&CK mapping
-- analyst assessment
-- containment
-- remediation
-- preventive controls
-- lessons learned
+It covers detection evidence, investigation indicators, timeline, ATT&CK mapping, analyst assessment, containment, remediation, preventive controls and lessons learned.
 
 ---
 
-## Testing and Continuous Integration
+## Security Audit
 
-ThreatTrace includes automated unit tests for core parsing and detection behaviour.
+A focused security and safety review is available in [`SECURITY-AUDIT.md`](SECURITY-AUDIT.md).
 
-Run locally with:
+The current assessment is **low risk for its intended local, synthetic use**. The most important controls are keeping the telemetry synthetic, avoiding real credentials and targets, reviewing AI-assisted code, and maintaining least-privilege CI permissions.
 
-```bash
-python -m unittest discover -s tests -v
-```
+---
 
-GitHub Actions runs the same test suite automatically on pushes and pull requests.
+## AI-Assisted Development
 
-The project favours deterministic, explainable detection logic over opaque scoring.
+AI tools were used during development for assistance with coding, debugging, documentation and review. The final project remains the author's responsibility: generated suggestions were reviewed, adapted and tested rather than treated as authoritative.
+
+AI assistance does not mean the project represents production experience. The important claim is what can be demonstrated and explained in the code and investigation workflow.
 
 ---
 
 ## Data and Safety
 
-Threat Trace is an educational and portfolio environment and is designed to use synthetic security telemetry.
+ThreatTrace is an educational portfolio environment and is designed to use synthetic security telemetry.
 
 - No real credentials are required or included.
-- No production or third party systems are scanned, attacked, or authenticated against.
+- No production or third-party systems are scanned, attacked or authenticated against.
 - The sample authentication events are generated locally for defensive analysis.
-- The sample IP addresses use documentation/private address space rather than identifiable public hosts.
-- The project should not be populated with real employee, customer, production, or other personal data.
-- Third-party material, where referenced, should remain subject to its original licence and attribution requirements.
+- The sample IP addresses use private/documentation-safe address space rather than identifiable public hosts.
+- The project should not be populated with real employee, customer, production or other personal data.
+- Third-party material, where referenced, remains subject to its original licence and attribution requirements.
 
-This repository is not intended to provide legal advice. If real organisational or personal data is introduced in the future, the applicable data protection, security, contractual, and retention requirements must be assessed before use.
+This repository is not intended to provide legal advice. If real organisational or personal data is introduced in the future, applicable data-protection, security, contractual and retention requirements must be assessed before use.
 
 ---
 
 ## Skills Demonstrated
-
-This project is intended to demonstrate practical exposure to:
 
 - SOC alert triage
 - Detection engineering
 - Security log analysis
 - Event correlation
 - IOC identification
-- Hypothesis driven investigation
+- Hypothesis-driven investigation
 - Timeline reconstruction
 - MITRE ATT&CK
 - Incident response concepts
@@ -356,9 +316,9 @@ This project is intended to demonstrate practical exposure to:
 
 ## Project Status
 
-**Current:** SSH brute-force detection and investigation workflow implemented, with interactive evidence-driven recruiter demonstrations, hypothesis-driven analysis, visual correlation, automated tests, and GitHub Actions CI.
+**Current:** SSH brute-force detection and investigation workflow implemented with interactive demonstrations, visual evidence aids, automated tests, CI and a documented security review.
 
-**Future development:** additional defensive scenarios, broader test coverage, deeper endpoint/network correlation, and continued documentation refinement.
+**Future development:** only small defensive scenarios, targeted test coverage and documentation improvements. The project is intentionally not being expanded into a full SIEM/SOAR or production platform.
 
 ---
 
